@@ -14,7 +14,9 @@ add_project_arguments('-Wall',
                       # '-Wshadow',
                       '-Wswitch-default',
                       '-Wswitch-enum',
-                      '-flto',
+                      # '-flto',
+                      '-Wno-error=unused-parameter',
+                      '-Wno-error=unused-variable',
                       language: 'cpp')
 
 cxx = meson.get_compiler('cpp')
@@ -24,6 +26,7 @@ gl = dependency('gl')
 glfw = dependency('glfw3')
 libdl = cxx.find_library('dl', required: false)
 threads = dependency('threads')
+x11 = dependency('x11')
 
 glad_incdir = include_directories('include/saa')
 incdir = include_directories('include')
@@ -36,7 +39,7 @@ saa_srcs = [
 ]
 libsaa = shared_library('saa', saa_srcs,
                         include_directories: [incdir, glad_incdir],
-                        dependencies: [eigen, glfw, libdl, threads],
+                        dependencies: [eigen, gl, glfw, libdl, threads],
                         install: true,
                         cpp_args: '-DEIGEN_MAX_ALIGN_BYTES=0',
 )
@@ -45,7 +48,7 @@ libsaa = shared_library('saa', saa_srcs,
 executable('saa_main', 'src/saa_main.cpp',
            include_directories: incdir,
            link_with: [libsaa],
-           dependencies: [eigen],
+           dependencies: [eigen, gl],
            install: true,
 )
 
