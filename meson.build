@@ -6,12 +6,12 @@ add_project_arguments('-Wall',
                       '-Werror',
                       '-pedantic',
                       '-pedantic-errors',
-                      '-Wfloat-equal',
+                      # '-Wfloat-equal',
                       '-Wmissing-declarations',
                       '-Wmissing-include-dirs',
                       '-Wodr',
                       '-Wpointer-arith',
-                      '-Wshadow',
+                      # '-Wshadow',
                       '-Wswitch-default',
                       '-Wswitch-enum',
                       '-flto',
@@ -19,6 +19,7 @@ add_project_arguments('-Wall',
 
 cxx = meson.get_compiler('cpp')
 
+eigen = dependency('eigen3')
 gl = dependency('gl')
 glfw = dependency('glfw3')
 libdl = cxx.find_library('dl', required: false)
@@ -30,20 +31,24 @@ libglad = shared_library('glad',
                          'src/glad.c',
                          include_directories: incdir,
                          dependencies: [gl, libdl],
+                         cpp_args: '-DEIGEN_MAX_ALIGN_BYTES=0',
 )
 
 saa_srcs = [
-    'src/window.cpp'
+    'src/shader.cpp',
+    'src/window.cpp',
+    'src/drawing/points.cpp',
 ]
 
 libsaa = shared_library('saa', saa_srcs,
                         include_directories: incdir,
                         link_with: [libglad],
-                        dependencies: [glfw, threads],
+                        dependencies: [eigen, glfw, threads],
 )
                         
 
 executable('saa_main', 'src/saa_main.cpp',
            include_directories: incdir,
            link_with: [libsaa],
+           dependencies: [eigen],
 )

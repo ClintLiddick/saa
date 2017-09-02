@@ -1,11 +1,18 @@
 #include "saa/window.hpp"
-
 #include <stdexcept>
 
 namespace saa {
 
+//
+// Public
+//
+
 Window::Window(const int width, const int height, const std::string &title)
-    : width_{width}, height_{height}, title_{title}, should_close_{false} {}
+    : width_{width}
+    , height_{height}
+    , title_{title}
+    , should_close_{false}
+    , bg_color_{0.0, 0.0, 0.0, 1.0} {}
 
 Window::~Window() { should_close_ = true; }
 
@@ -22,6 +29,21 @@ void Window::close() {
 }
 
 void Window::spin() { thread_.join(); }
+
+void Window::set_background_color(const Vec4f &color) {
+  const std::lock_guard<std::mutex> lck{mutex_};
+  bg_color_ = color;
+}
+
+Shader Window::create_shader(const std::string &vert_shader_path,
+                             const std::string &frag_shader_path) {
+  const std::lock_guard<std::mutex> lck{mutex_};
+  return Shader{vert_shader_path, frag_shader_path};
+}
+
+//
+// Private
+//
 
 void Window::initialize() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -43,7 +65,11 @@ void Window::spin_gl() {
 
     if (should_close_ || glfwWindowShouldClose(window_)) { break; }
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(bg_color_[0], bg_color_[1], bg_color_[2], bg_color_[3]);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    for (auto &d : drawables_) { d->draw(); }
+
     glfwSwapBuffers(window_);
     glfwPollEvents();
   }
