@@ -32,6 +32,8 @@ public:
 
   void set_background_color(const Vec4f &color);
 
+  void add_drawable(std::unique_ptr<Drawable> drawable);
+
   // Create a shader program in the current context.
   Shader create_shader(const std::string &vert_shader_path,
                        const std::string &frag_shader_path);

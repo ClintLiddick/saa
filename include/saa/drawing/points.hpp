@@ -13,6 +13,11 @@ public:
   Points(const Mat3Xf &points, Window &window);
   virtual ~Points() = default;
 
+  Points(const Points &) = default;
+  Points &operator=(const Points &) = default;
+  Points(Points &&) = default;
+  Points &operator=(Points &&) = default;
+
   void set_points(const Mat3Xf &points);
   void add_points(const Mat3Xf &points);
 
@@ -21,12 +26,16 @@ public:
   bool need_to_upload() override;
 
 private:
-  static constexpr char VERT_SHADER_PATH[] = "";
-  static constexpr char FRAG_SHADER_PATH[] = "";
+  static constexpr char VERT_SHADER_PATH[] =
+      "../../../share/shaders/points.vs.glsl";
+  static constexpr char FRAG_SHADER_PATH[] =
+      "../../../share/shaders/points.fs.glsl";
 
   Shader shader_;
   Mat3Xf points_;
   bool points_changed_;
+  GLuint vao_;
+  GLuint vbo_;
 };
 
 }  // namespace saa

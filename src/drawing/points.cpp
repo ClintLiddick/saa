@@ -1,17 +1,24 @@
 #include "saa/drawing/points.hpp"
 
+#include <iostream> // TODO rm
+
 namespace saa {
 
 constexpr char Points::VERT_SHADER_PATH[];
 constexpr char Points::FRAG_SHADER_PATH[];
 
-Points::Points(Window &window)
-    : shader_{window.create_shader(VERT_SHADER_PATH, FRAG_SHADER_PATH)} {}
+Points::Points(Window &window) : Points{{}, window} {}
 
 Points::Points(const Mat3Xf &points, Window &window)
     : shader_{window.create_shader(VERT_SHADER_PATH, FRAG_SHADER_PATH)}
     , points_{points}
-    , points_changed_{true} {}
+    , points_changed_{true}
+    , vao_{0}
+    , vbo_{0} {
+      std::cout << "vao" << std::endl;
+  glGenVertexArrays(1, &vao_);
+  glGenBuffers(1, &vbo_);
+}
 
 void Points::set_points(const Mat3Xf &points) {
   points_ = points;
@@ -23,9 +30,29 @@ void Points::add_points(const Mat3Xf &points) {
   points_.block(0, old_cols, points_.rows() - 1, points_.cols() - 1) = points;
 }
 
-void Points::draw() {}
+void Points::draw() {
+  shader_.use();
+  glBindVertexArray(vao_);
+  {  //
+    glDrawArrays(GL_POINTS, 0, points_.cols());
+  }  //
+  glBindVertexArray(0);
+}
 
-void Points::upload() { points_changed_ = false; }
+void Points::upload() {
+  glBindVertexArray(vao_);
+  {
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+    glBufferData(GL_ARRAY_BUFFER, points_.size(), points_.data(),
+                 GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+                          (void *)0);
+    glEnableVertexAttribArray(0);
+  }
+  glBindVertexArray(0);
+
+  points_changed_ = false;
+}
 
 bool Points::need_to_upload() { return points_changed_; }
 

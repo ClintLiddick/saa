@@ -15,7 +15,7 @@ public:
   Shader(Shader&&) = default;
   Shader& operator=(Shader&&) = default;
 
-  void use() const;
+  void use();
 
 private:
   friend class Window;

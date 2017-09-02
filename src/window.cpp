@@ -35,6 +35,10 @@ void Window::set_background_color(const Vec4f &color) {
   bg_color_ = color;
 }
 
+void Window::add_drawable(std::unique_ptr<Drawable> drawable) {
+  drawables_.push_back(std::move(drawable));
+}
+
 Shader Window::create_shader(const std::string &vert_shader_path,
                              const std::string &frag_shader_path) {
   const std::lock_guard<std::mutex> lck{mutex_};
@@ -56,7 +60,9 @@ void Window::initialize() {
   if (!window_) { throw std::runtime_error{"Unable to create window."}; }
 
   glfwMakeContextCurrent(window_);
-  gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    throw std::runtime_error{"Unable to load OpenGL context."};
+  }
 }
 
 void Window::spin_gl() {
@@ -64,11 +70,17 @@ void Window::spin_gl() {
     const std::lock_guard<std::mutex> lck{mutex_};
 
     if (should_close_ || glfwWindowShouldClose(window_)) { break; }
+    int width, height;
+    glfwGetFramebufferSize(window_, &width, &height);
+    glViewport(0, 0, width, height);
 
     glClearColor(bg_color_[0], bg_color_[1], bg_color_[2], bg_color_[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (auto &d : drawables_) { d->draw(); }
+    for (auto &d : drawables_) {
+      if (d->need_to_upload()) { d->upload(); }
+      d->draw();
+    }
 
     glfwSwapBuffers(window_);
     glfwPollEvents();
