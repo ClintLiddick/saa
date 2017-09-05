@@ -1,0 +1,7 @@
+#pragma once
+
+namespace saa {
+
+#define SAA_SHADER_PATH "@SAA_SHADER_PATH@"
+
+}  // namespace saa

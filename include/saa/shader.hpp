@@ -8,8 +8,6 @@ namespace saa {
 
 class Shader final {
 public:
-  ~Shader();
-
   Shader(const Shader&) = delete;
   Shader& operator=(const Shader&) = delete;
   Shader(Shader&&) = default;

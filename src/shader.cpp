@@ -61,8 +61,6 @@ Shader::Shader(const std::string &vert_shader_path,
   glDeleteShader(fs);
 }
 
-Shader::~Shader() { glDeleteProgram(program_); }
-
 void Shader::use() { glUseProgram(program_); }
 
 }  // namespace saa

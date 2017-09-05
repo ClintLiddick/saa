@@ -6,15 +6,13 @@ add_project_arguments('-Wall',
                       '-Werror',
                       '-pedantic',
                       '-pedantic-errors',
-                      # '-Wfloat-equal',
                       '-Wmissing-declarations',
                       '-Wmissing-include-dirs',
                       '-Wodr',
                       '-Wpointer-arith',
-                      # '-Wshadow',
                       '-Wswitch-default',
                       '-Wswitch-enum',
-                      # '-flto',
+                      '-flto',
                       '-Wno-error=unused-parameter',
                       '-Wno-error=unused-variable',
                       language: 'cpp')
@@ -31,6 +29,14 @@ x11 = dependency('x11')
 glad_incdir = include_directories('include/saa')
 incdir = include_directories('include')
 
+saa_conf = configuration_data()
+saa_conf.set('SAA_SHADER_PATH', get_option('prefix') + '/' + get_option('datadir') + '/saa/shaders')
+configure_file(
+    input: 'src/config.hpp.in',
+    output: 'config.hpp',
+    configuration: saa_conf)
+conf_incdir = include_directories('.')
+
 saa_srcs = [
     'src/glad.c',
     'src/shader.cpp',
@@ -38,7 +44,7 @@ saa_srcs = [
     'src/drawing/points.cpp',
 ]
 libsaa = shared_library('saa', saa_srcs,
-                        include_directories: [incdir, glad_incdir],
+                        include_directories: [incdir, glad_incdir, conf_incdir],
                         dependencies: [eigen, gl, glfw, libdl, threads],
                         install: true,
                         cpp_args: '-DEIGEN_MAX_ALIGN_BYTES=0',
@@ -57,6 +63,7 @@ shaders = [
     'src/shaders/points.vs.glsl',
     'src/shaders/points.fs.glsl',
 ]
+
 
 install_subdir('include/saa', install_dir: 'include')
 install_data(shaders, install_dir: 'share/saa/shaders')

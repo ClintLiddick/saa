@@ -13,6 +13,9 @@ public:
   Points(const Mat3Xf &points, Window &window);
   virtual ~Points() = default;
 
+  Points(const Points &) = delete;
+  Points &operator=(const Points &) = delete;
+
   Points(Points &&) = default;
   Points &operator=(Points &&) = default;
 
@@ -25,12 +28,6 @@ public:
   bool need_to_upload() override;
 
 private:
-  // TODO config.h
-  static constexpr char VERT_SHADER_PATH[] =
-      "/home/clint/projects/saa/install/share/saa/shaders/points.vs.glsl";
-  static constexpr char FRAG_SHADER_PATH[] =
-      "/home/clint/projects/saa/install/share/saa/shaders/points.fs.glsl";
-
   Shader shader_;
   Mat3Xf points_;
   bool points_changed_;

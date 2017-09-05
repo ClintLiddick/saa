@@ -1,9 +1,15 @@
 #include "saa/drawing/points.hpp"
 
+#include "config.hpp"
+
 namespace saa {
 
-constexpr char Points::VERT_SHADER_PATH[];
-constexpr char Points::FRAG_SHADER_PATH[];
+namespace {
+
+constexpr char VERT_SHADER_PATH[] = SAA_SHADER_PATH "/points.vs.glsl";
+constexpr char FRAG_SHADER_PATH[] = SAA_SHADER_PATH "/points.fs.glsl";
+
+}  // namespace
 
 Points::Points(Window &window) : Points{{}, window} {}
 
