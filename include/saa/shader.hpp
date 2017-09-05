@@ -10,8 +10,8 @@ class Shader final {
 public:
   ~Shader();
 
-  Shader(const Shader&) = default;
-  Shader& operator=(const Shader&) = default;
+  Shader(const Shader&) = delete;
+  Shader& operator=(const Shader&) = delete;
   Shader(Shader&&) = default;
   Shader& operator=(Shader&&) = default;
 

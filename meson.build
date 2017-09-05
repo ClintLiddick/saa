@@ -50,6 +50,7 @@ executable('saa_main', 'src/saa_main.cpp',
            link_with: [libsaa],
            dependencies: [eigen, gl],
            install: true,
+           cpp_args: '-DEIGEN_MAX_ALIGN_BYTES=0',
 )
 
 shaders = [

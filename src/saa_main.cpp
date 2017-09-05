@@ -10,13 +10,19 @@ int main() {
 
   saa::Window win{900, 600, "Hello"};
   win.open();
+  std::cout << "opened" << std::endl;
 
-  saa::Mat3Xf points(3, 1);
-  points << 0, 0, 0;
+  saa::Mat3Xf points(3, 3);
+  points.col(0) << 0, 0, 0;
+  points.col(1) << 0, 0.7, 0;
+  points.col(2) << 0.5, 0.5, 0;
 
   auto p = std::make_unique<saa::Points>(win);
-  // win.add_drawable(std::move(p));
+  p->set_points(points);
+  win.set_background_color({0.2,0.2,0.2,1.0});
+  win.add_drawable(std::move(p));
 
+  std::cout << "start spin" << std::endl;
   win.spin();
   win.close();
   std::cout << "goodbye" << std::endl;

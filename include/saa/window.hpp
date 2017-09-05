@@ -43,6 +43,8 @@ private:
   void spin_gl();
 
 private:
+  static constexpr std::chrono::milliseconds MS_PER_FRAME{16};
+
   const int width_;
   const int height_;
   const std::string title_;
@@ -51,6 +53,7 @@ private:
   std::mutex mutex_;
 
   GLFWwindow *window_;
+  bool initialized_;
   bool should_close_;
 
   Vec4f bg_color_;

@@ -1,4 +1,6 @@
 #include "saa/window.hpp"
+
+#include <chrono>
 #include <stdexcept>
 
 namespace saa {
@@ -11,6 +13,7 @@ Window::Window(const int width, const int height, const std::string &title)
     : width_{width}
     , height_{height}
     , title_{title}
+    , initialized_{false}
     , should_close_{false}
     , bg_color_{0.0, 0.0, 0.0, 1.0} {}
 
@@ -21,6 +24,15 @@ void Window::open() {
     initialize();
     spin_gl();
   }};
+
+  while (true) {
+    {
+      const std::lock_guard<std::mutex> lck{mutex_};
+      if (initialized_) { break; }
+    }
+    std::this_thread::sleep_until(std::chrono::steady_clock::now()
+                                  + MS_PER_FRAME);
+  }
 }
 
 void Window::close() {
@@ -30,19 +42,30 @@ void Window::close() {
 
 void Window::spin() { thread_.join(); }
 
+//
+// Drawing utility
+//
+
 void Window::set_background_color(const Vec4f &color) {
   const std::lock_guard<std::mutex> lck{mutex_};
   bg_color_ = color;
 }
 
 void Window::add_drawable(std::unique_ptr<Drawable> drawable) {
+  const std::lock_guard<std::mutex> lck{mutex_};
+  glfwMakeContextCurrent(window_);
   drawables_.push_back(std::move(drawable));
+  drawables_.back()->initialize();
+  glfwMakeContextCurrent(nullptr);
 }
 
 Shader Window::create_shader(const std::string &vert_shader_path,
                              const std::string &frag_shader_path) {
   const std::lock_guard<std::mutex> lck{mutex_};
-  return Shader{vert_shader_path, frag_shader_path};
+  glfwMakeContextCurrent(window_);
+  Shader shader{vert_shader_path, frag_shader_path};
+  glfwMakeContextCurrent(nullptr);
+  return shader;
 }
 
 //
@@ -50,6 +73,7 @@ Shader Window::create_shader(const std::string &vert_shader_path,
 //
 
 void Window::initialize() {
+  const std::lock_guard<std::mutex> lck{mutex_};
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -63,30 +87,40 @@ void Window::initialize() {
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     throw std::runtime_error{"Unable to load OpenGL context."};
   }
+
+  initialized_ = true;
 }
 
 void Window::spin_gl() {
   while (true) {
-    const std::lock_guard<std::mutex> lck{mutex_};
+    const auto start = std::chrono::steady_clock::now();
+    {
+      const std::lock_guard<std::mutex> lck{mutex_};
+      glfwMakeContextCurrent(window_);
 
-    if (should_close_ || glfwWindowShouldClose(window_)) { break; }
-    int width, height;
-    glfwGetFramebufferSize(window_, &width, &height);
-    glViewport(0, 0, width, height);
+      if (should_close_ || glfwWindowShouldClose(window_)) { break; }
+      int width, height;
+      glfwGetFramebufferSize(window_, &width, &height);
+      glViewport(0, 0, width, height);
 
-    glClearColor(bg_color_[0], bg_color_[1], bg_color_[2], bg_color_[3]);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glClearColor(bg_color_[0], bg_color_[1], bg_color_[2], bg_color_[3]);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (auto &d : drawables_) {
-      if (d->need_to_upload()) { d->upload(); }
-      d->draw();
+      for (auto &d : drawables_) {
+        if (d->need_to_upload()) { d->upload(); }
+        d->draw();
+      }
+
+      glfwSwapBuffers(window_);
+      glfwPollEvents();
+      glfwMakeContextCurrent(nullptr);
     }
 
-    glfwSwapBuffers(window_);
-    glfwPollEvents();
+    std::this_thread::sleep_until(start + MS_PER_FRAME);
   }
 
   glfwTerminate();
 }
 
+constexpr std::chrono::milliseconds Window::MS_PER_FRAME;
 }  // namespace saa
