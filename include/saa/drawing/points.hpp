@@ -23,7 +23,7 @@ public:
   void add_points(const Mat3Xf &points);
 
   void initialize() override;
-  void draw() override;
+  void draw(const Mat4f &clip_from_world) override;
   void upload() override;
   bool need_to_upload() override;
 

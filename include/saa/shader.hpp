@@ -3,6 +3,7 @@
 #include <string>
 
 #include "saa/gl.h"
+#include "saa/types.hpp"
 
 namespace saa {
 
@@ -14,6 +15,8 @@ public:
   Shader& operator=(Shader&&) = default;
 
   void use();
+
+  void set_clip_from_local(const Mat4f &clip_from_local);
 
 private:
   friend class Window;

@@ -13,9 +13,9 @@ int main() {
   std::cout << "opened" << std::endl;
 
   saa::Mat3Xf points(3, 3);
-  points.col(0) << 0, 0, 0;
-  points.col(1) << 0, 0.7, 0;
-  points.col(2) << 0.5, 0.5, 0;
+  points.col(0) << 10, 10, 0;
+  points.col(1) << 0, 7, 0;
+  points.col(2) << 5, 5, 0;
 
   auto p = std::make_unique<saa::Points>(win);
   p->set_points(points);

@@ -63,4 +63,15 @@ Shader::Shader(const std::string &vert_shader_path,
 
 void Shader::use() { glUseProgram(program_); }
 
+void Shader::set_clip_from_local(const Mat4f &clip_from_local) {
+  const GLint clip_from_local_location =
+      glGetUniformLocation(program_, "clip_from_local");
+  if (clip_from_local_location < 0) {
+    throw std::runtime_error{
+        "Failed to find \"clip_from_local\" uniform in shader."};
+  }
+  glUniformMatrix4fv(clip_from_local_location, 1, GL_FALSE,
+                     clip_from_local.data());
+}
+
 }  // namespace saa

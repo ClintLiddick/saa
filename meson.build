@@ -39,6 +39,7 @@ conf_incdir = include_directories('.')
 
 saa_srcs = [
     'src/glad.c',
+    'src/projection.cpp',
     'src/shader.cpp',
     'src/window.cpp',
     'src/drawing/points.cpp',

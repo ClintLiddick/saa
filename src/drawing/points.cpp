@@ -36,9 +36,10 @@ void Points::add_points(const Mat3Xf &points) {
   points_changed_ = true;
 }
 
-void Points::draw() {
+void Points::draw(const Mat4f &clip_from_world) {
   if (points_.size() == 0) { return; }
   shader_.use();
+  shader_.set_clip_from_local(clip_from_world);
   glBindVertexArray(vao_);
   {  //
     glDrawArrays(GL_POINTS, 0, points_.cols());

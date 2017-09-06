@@ -3,6 +3,8 @@
 #include <chrono>
 #include <stdexcept>
 
+#include "saa/projection.hpp"
+
 namespace saa {
 
 //
@@ -92,6 +94,10 @@ void Window::initialize() {
 }
 
 void Window::spin_gl() {
+  // // clang-format off
+  // clip_from_world <<
+
+  // // clang-format on
   while (true) {
     const auto start = std::chrono::steady_clock::now();
     {
@@ -99,16 +105,22 @@ void Window::spin_gl() {
       glfwMakeContextCurrent(window_);
 
       if (should_close_ || glfwWindowShouldClose(window_)) { break; }
+
       int width, height;
       glfwGetFramebufferSize(window_, &width, &height);
+      const float aspect = (float)width / height;
       glViewport(0, 0, width, height);
+      // Fix vertical aspect ratio, and let horizontal size determine view
+      // width, not ratio.
+      const Mat4f clip_from_world =
+          ortho_projection(-100 * aspect, 100 * aspect, -100, 100, -100, 100);
 
       glClearColor(bg_color_[0], bg_color_[1], bg_color_[2], bg_color_[3]);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       for (auto &d : drawables_) {
         if (d->need_to_upload()) { d->upload(); }
-        d->draw();
+        d->draw(clip_from_world);
       }
 
       glfwSwapBuffers(window_);
