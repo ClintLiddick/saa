@@ -42,6 +42,9 @@ private:
   void initialize();
   void spin_gl();
 
+  void handle_key_event(const int key, const int scancode, const int action,
+                        const int mods);
+
 private:
   static constexpr std::chrono::milliseconds MS_PER_FRAME{16};
 

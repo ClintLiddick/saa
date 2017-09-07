@@ -90,7 +90,20 @@ void Window::initialize() {
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     throw std::runtime_error{"Unable to load OpenGL context."};
   }
+
   glEnable(GL_DEPTH_TEST);
+
+  // Make class instance available in C-style function poitner callbacks.
+  glfwSetWindowUserPointer(window_, static_cast<void *>(this));
+
+  // Register callbacks
+
+  glfwSetKeyCallback(
+      window_, [](GLFWwindow *window, const int key, const int scancode,
+                  const int action, const int mods) {
+        Window *self = static_cast<Window *>(glfwGetWindowUserPointer(window));
+        self->handle_key_event(key, scancode, action, mods);
+      });
 
   initialized_ = true;
 }
@@ -108,6 +121,7 @@ void Window::spin_gl() {
       glfwGetFramebufferSize(window_, &width, &height);
       const float aspect = (float)width / height;
       glViewport(0, 0, width, height);
+
       // Fix vertical aspect ratio, and let horizontal size determine view
       // width, not ratio.
       const Mat4f clip_from_view =
@@ -131,7 +145,16 @@ void Window::spin_gl() {
     std::this_thread::sleep_until(start + MS_PER_FRAME);
   }
 
+  const std::lock_guard<std::mutex> lck{mutex_};
+  glfwMakeContextCurrent(window_);
   glfwTerminate();
+}
+
+void Window::handle_key_event(const int key, const int scancode,
+                              const int action, const int mods) {
+  if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q) && action == GLFW_PRESS) {
+    should_close_ = true;
+  }
 }
 
 constexpr std::chrono::milliseconds Window::MS_PER_FRAME;

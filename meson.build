@@ -13,9 +13,10 @@ add_project_arguments('-Wall',
                       '-Wswitch-default',
                       '-Wswitch-enum',
                       '-flto',
+                      '-Wno-error=unused-but-set-variable',
+                      '-Wno-error=unused-function',
                       '-Wno-error=unused-parameter',
                       '-Wno-error=unused-variable',
-                      '-Wno-error=unused-but-set-variable',
                       language: 'cpp')
 
 cxx = meson.get_compiler('cpp')
