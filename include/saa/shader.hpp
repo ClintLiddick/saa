@@ -16,7 +16,8 @@ public:
 
   void use();
 
-  void set_clip_from_local(const Mat4f &clip_from_local);
+  void set_clip_from_local(const Mat4f& clip_from_local);
+  void set_uniformf(const std::string& name, const float value);
 
 private:
   friend class Window;

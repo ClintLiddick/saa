@@ -63,6 +63,15 @@ Shader::Shader(const std::string &vert_shader_path,
 
 void Shader::use() { glUseProgram(program_); }
 
+void Shader::set_uniformf(const std::string &name, const float value) {
+  const GLint location = glGetUniformLocation(program_, name.c_str());
+  if (location < 0) {
+    throw std::runtime_error{"Failed to find \"" + name
+                             + "\" uniform in shader."};
+  }
+  glUniform1f(location, value);
+}
+
 void Shader::set_clip_from_local(const Mat4f &clip_from_local) {
   const GLint clip_from_local_location =
       glGetUniformLocation(program_, "clip_from_local");

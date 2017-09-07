@@ -11,11 +11,13 @@ constexpr char FRAG_SHADER_PATH[] = SAA_SHADER_PATH "/points.fs.glsl";
 
 }  // namespace
 
-Points::Points(Window &window) : Points{{}, window} {}
+Points::Points(Window &window, const float point_size)
+    : Points{window, {}, point_size} {}
 
-Points::Points(const Mat3Xf &points, Window &window)
+Points::Points(Window &window, const Mat3Xf &points, const float point_size)
     : shader_{window.create_shader(VERT_SHADER_PATH, FRAG_SHADER_PATH)}
     , points_{points}
+    , point_size_{point_size}
     , points_changed_{false}
     , vao_{0}
     , vbo_{0} {}
@@ -36,10 +38,15 @@ void Points::add_points(const Mat3Xf &points) {
   points_changed_ = true;
 }
 
+void Points::set_point_size(const float point_size) {
+  point_size_ = point_size;
+}
+
 void Points::draw(const Mat4f &clip_from_world) {
   if (points_.size() == 0) { return; }
   shader_.use();
   shader_.set_clip_from_local(clip_from_world);
+  shader_.set_uniformf("point_size", point_size_);
   glBindVertexArray(vao_);
   {  //
     glDrawArrays(GL_POINTS, 0, points_.cols());

@@ -14,7 +14,7 @@ int main() {
   points.col(1) << 0, 7, 0;
   points.col(2) << 5, 5, 0;
 
-  auto p = std::make_unique<saa::Points>(win);
+  auto p = std::make_unique<saa::Points>(win, 2);
   p->set_points(points);
   win.set_background_color({0.2, 0.2, 0.2, 1.0});
   win.add_drawable(std::move(p));

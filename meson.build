@@ -41,11 +41,12 @@ conf_incdir = include_directories('.')
 
 saa_srcs = [
     'src/camera.cpp',
+    'src/drawing/points.cpp',
     'src/glad.c',
+    'src/math.cpp',
     'src/projection.cpp',
     'src/shader.cpp',
     'src/window.cpp',
-    'src/drawing/points.cpp',
 ]
 libsaa = shared_library('saa', saa_srcs,
                         include_directories: [incdir, glad_incdir, conf_incdir],

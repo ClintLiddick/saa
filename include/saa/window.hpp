@@ -42,8 +42,10 @@ private:
   void initialize();
   void spin_gl();
 
-  void handle_key_event(const int key, const int scancode, const int action,
-                        const int mods);
+  void key_callback(const int key, const int scancode, const int action,
+                    const int mods);
+
+  void scroll_callback(const double xoffset, const double yoffset);
 
 private:
   static constexpr std::chrono::milliseconds MS_PER_FRAME{16};
@@ -60,7 +62,11 @@ private:
   bool should_close_;
 
   Vec4f bg_color_;
+  bool ortho_;
   std::vector<std::unique_ptr<Drawable>> drawables_;
+  float fov_;
+  Vec3f camera_pos_;
+  Vec3f camera_target_pos_;
 };
 
 }  // namespace saa

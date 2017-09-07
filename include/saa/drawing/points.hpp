@@ -9,8 +9,8 @@ namespace saa {
 
 class Points final : public Drawable {
 public:
-  explicit Points(Window &window);
-  Points(const Mat3Xf &points, Window &window);
+  explicit Points(Window &window, const float point_size = 1.0);
+  Points(Window &window, const Mat3Xf &points, const float point_size = 1.0);
   virtual ~Points() = default;
 
   Points(const Points &) = delete;
@@ -21,6 +21,7 @@ public:
 
   void set_points(const Mat3Xf &points);
   void add_points(const Mat3Xf &points);
+  void set_point_size(const float point_size);
 
   void initialize() override;
   void draw(const Mat4f &clip_from_world) override;
@@ -30,6 +31,7 @@ public:
 private:
   Shader shader_;
   Mat3Xf points_;
+  float point_size_;
   bool points_changed_;
   GLuint vao_;
   GLuint vbo_;

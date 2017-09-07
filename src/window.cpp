@@ -18,7 +18,11 @@ Window::Window(const int width, const int height, const std::string &title)
     , title_{title}
     , initialized_{false}
     , should_close_{false}
-    , bg_color_{0.0, 0.0, 0.0, 1.0} {}
+    , bg_color_{0.0, 0.0, 0.0, 1.0}
+    , ortho_{false}
+    , fov_{45.0}
+    , camera_pos_{0, 0, 3}
+    , camera_target_pos_{0, 0, 0} {}
 
 Window::~Window() { should_close_ = true; }
 
@@ -92,6 +96,7 @@ void Window::initialize() {
   }
 
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_PROGRAM_POINT_SIZE);
 
   // Make class instance available in C-style function poitner callbacks.
   glfwSetWindowUserPointer(window_, static_cast<void *>(this));
@@ -102,8 +107,14 @@ void Window::initialize() {
       window_, [](GLFWwindow *window, const int key, const int scancode,
                   const int action, const int mods) {
         Window *self = static_cast<Window *>(glfwGetWindowUserPointer(window));
-        self->handle_key_event(key, scancode, action, mods);
+        self->key_callback(key, scancode, action, mods);
       });
+
+  glfwSetScrollCallback(window_, [](GLFWwindow *window, const double xoffset,
+                                    const double yoffset) {
+    Window *self = static_cast<Window *>(glfwGetWindowUserPointer(window));
+    self->scroll_callback(xoffset, yoffset);
+  });
 
   initialized_ = true;
 }
@@ -125,8 +136,11 @@ void Window::spin_gl() {
       // Fix vertical aspect ratio, and let horizontal size determine view
       // width, not ratio.
       const Mat4f clip_from_view =
-          ortho_projection(-100 * aspect, 100 * aspect, -100, 100, -100, 100);
-      const Mat4f view_from_world = look_at({0, 0, -10}, {0, 0, 0}, {0, 1, 0});
+          ortho_ ? ortho_projection(-100 * aspect, 100 * aspect, -100, 100, 0.1,
+                                    100) :
+                   perspective_projection(fov_, aspect, 10, 100);
+      const Mat4f view_from_world =
+          look_at(camera_pos_, camera_target_pos_, {0, 1, 0});
       const Mat4f clip_from_world = clip_from_view * view_from_world;
 
       glClearColor(bg_color_[0], bg_color_[1], bg_color_[2], bg_color_[3]);
@@ -150,11 +164,18 @@ void Window::spin_gl() {
   glfwTerminate();
 }
 
-void Window::handle_key_event(const int key, const int scancode,
-                              const int action, const int mods) {
+void Window::key_callback(const int key, const int /* scancode */,
+                          const int action, const int /* mods */) {
   if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q) && action == GLFW_PRESS) {
     should_close_ = true;
   }
+  if (key == GLFW_KEY_P && action == GLFW_RELEASE) { ortho_ = !ortho_; }
+}
+
+void Window::scroll_callback(const double xoffset, const double yoffset) {
+  if (fov_ >= 1.0 && fov_ <= 45.0) { fov_ -= yoffset; }
+  if (fov_ <= 1.0) { fov_ = 1.0; }
+  if (fov_ >= 45.0) { fov_ = 45.0; }
 }
 
 constexpr std::chrono::milliseconds Window::MS_PER_FRAME;
