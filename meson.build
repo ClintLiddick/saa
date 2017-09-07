@@ -15,6 +15,7 @@ add_project_arguments('-Wall',
                       '-flto',
                       '-Wno-error=unused-parameter',
                       '-Wno-error=unused-variable',
+                      '-Wno-error=unused-but-set-variable',
                       language: 'cpp')
 
 cxx = meson.get_compiler('cpp')
@@ -38,6 +39,7 @@ configure_file(
 conf_incdir = include_directories('.')
 
 saa_srcs = [
+    'src/camera.cpp',
     'src/glad.c',
     'src/projection.cpp',
     'src/shader.cpp',

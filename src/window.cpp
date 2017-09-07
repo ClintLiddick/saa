@@ -3,6 +3,7 @@
 #include <chrono>
 #include <stdexcept>
 
+#include "saa/camera.hpp"
 #include "saa/projection.hpp"
 
 namespace saa {
@@ -89,15 +90,12 @@ void Window::initialize() {
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     throw std::runtime_error{"Unable to load OpenGL context."};
   }
+  glEnable(GL_DEPTH_TEST);
 
   initialized_ = true;
 }
 
 void Window::spin_gl() {
-  // // clang-format off
-  // clip_from_world <<
-
-  // // clang-format on
   while (true) {
     const auto start = std::chrono::steady_clock::now();
     {
@@ -112,8 +110,10 @@ void Window::spin_gl() {
       glViewport(0, 0, width, height);
       // Fix vertical aspect ratio, and let horizontal size determine view
       // width, not ratio.
-      const Mat4f clip_from_world =
+      const Mat4f clip_from_view =
           ortho_projection(-100 * aspect, 100 * aspect, -100, 100, -100, 100);
+      const Mat4f view_from_world = look_at({0, 0, -10}, {0, 0, 0}, {0, 1, 0});
+      const Mat4f clip_from_world = clip_from_view * view_from_world;
 
       glClearColor(bg_color_[0], bg_color_[1], bg_color_[2], bg_color_[3]);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
