@@ -41,6 +41,7 @@ conf_incdir = include_directories('.')
 
 saa_srcs = [
     'src/camera.cpp',
+    'src/drawing/circles.cpp',
     'src/drawing/points.cpp',
     'src/glad.c',
     'src/math.cpp',
@@ -65,6 +66,8 @@ executable('saa_main', 'src/saa_main.cpp',
 )
 
 shaders = [
+    'src/shaders/circles.vs.glsl',
+    'src/shaders/circles.fs.glsl',
     'src/shaders/points.vs.glsl',
     'src/shaders/points.fs.glsl',
 ]
